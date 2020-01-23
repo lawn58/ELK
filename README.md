@@ -4,29 +4,29 @@ Elasticsearch+kibana+logstash+filebeat
 
 Разворачиваем Vagrant-стенд с помощью команды
 
-  vagrant up
+    vagrant up
 
 Подключаемся по ssh к машине elk:
 
-  vagrant ssh elk
+    vagrant ssh elk
 
   ШАГ 1. Отключаем SELINUХ
 
 Отключаем SELINUХ, для этого открываем файл 
 
-  vim /etc/sysconfig/selinux
+    vim /etc/sysconfig/selinux
 
 И меняем на
 
-  SELINUX=disabled
+    SELINUX=disabled
 
 После чего перезагружаем машину, для применения настроек SELINUX
 
-  reboot
+    reboot
 
 Проверяем состояние SELINUX
 
-  getenforce
+    getenforce
 
 И убеждаемся что disabled
 
@@ -135,14 +135,14 @@ Elasticsearch+kibana+logstash+filebeat
    
     vim /etc/logstash/conf.d/filebeat-input.conf
     
-    input {
-  beats {
+      input {
+    beats {
     port => 5443
     ssl => true
     ssl_certificate => "/etc/pki/tls/certs/logstash-forwarder.crt"
     ssl_key => "/etc/pki/tls/private/logstash-forwarder.key"
-  }
-}
+    }
+    }
 
    Сохраняем файл и выходим из него
    
@@ -151,7 +151,7 @@ Elasticsearch+kibana+logstash+filebeat
     vim /etc/logstash/conf.d/syslog-filter.conf
     
     filter {
-  if [type] == "syslog" {
+    if [type] == "syslog" {
     grok {
       match => { "message" => "%{SYSLOGTIMESTAMP:syslog_timestamp} %{SYSLOGHOST:syslog_hostname} %{DATA:syslog_program}(?:\[%{POSINT:syslog_pid}\])?: %{GREEDYDATA:syslog_message}" }
       add_field => [ "received_at", "%{@timestamp}" ]
@@ -160,24 +160,24 @@ Elasticsearch+kibana+logstash+filebeat
     date {
       match => [ "syslog_timestamp", "MMM  d HH:mm:ss", "MMM dd HH:mm:ss" ]
     }
-  }
-}
+    }
+    }
 
 
   Сохраняем файл и выходим
     
   Содаем файл output-elasticsearch.conf и добавляем в него следующее содержимое:
   
-  vim /etc/logstash/conf.d/output-elasticsearch.conf
+    vim /etc/logstash/conf.d/output-elasticsearch.conf
   
-  output {
-  elasticsearch { hosts => ["localhost:9200"]
+    output {
+    elasticsearch { hosts => ["localhost:9200"]
     hosts => "localhost:9200"
     manage_template => false
     index => "%{[@metadata][beat]}-%{+YYYY.MM.dd}"
     document_type => "%{[@metadata][type]}"
-  }
-}
+    }
+    }
 
   Сохраняем файл и выходим
   Добавляем logstash в автозагрузку и стартуем его:
@@ -252,4 +252,4 @@ Elasticsearch+kibana+logstash+filebeat
    
    
    
-   https://www.howtoforge.com/tutorial/how-to-install-elastic-stack-on-centos-7/?__cf_chl_captcha_tk__=7f71277d032bd8cf886d223cd8f56253e8d601df-1579787901-0-Af2uoCeRWq0eF-EqTXD7uHAMj2T0tSQ9kvw_LguW_YWpdZhCLrjOKAAxUKV4NHxwlw-RxedVoeZ-0m6HWhFgeYSBKW5gKtAuGE64LA-ItzB5lHFV3F90egLFHNME0C9jQQKoMKAu_DnpxmcN3x9e1YQ4VwlCjFyhFcUDiDhjHG-X6duY3EtQCKRlyJnFL4Wa47fV-8ZVlPcV_ZPzmHDDpF4DaU9hW2tnz4jtW0jSbB0YvcjSoTEDTCA9y09y9yfNovNK4KAgrSG5Sn-W7pbAD_evAJZMFZTmXl57rrno6KQdNeU540CrG58eB9MqkSBV6fh1CmJLRZU1w0b2YiAN4Y0fXZm6Te73b_olgo_v2C-QvU-DfIcjLA6uDCnRnTxljg
+    https://www.howtoforge.com/tutorial/how-to-install-elastic-stack-on-centos-7/?__cf_chl_captcha_tk__=7f71277d032bd8cf886d223cd8f56253e8d601df-1579787901-0-Af2uoCeRWq0eF-EqTXD7uHAMj2T0tSQ9kvw_LguW_YWpdZhCLrjOKAAxUKV4NHxwlw-RxedVoeZ-0m6HWhFgeYSBKW5gKtAuGE64LA-ItzB5lHFV3F90egLFHNME0C9jQQKoMKAu_DnpxmcN3x9e1YQ4VwlCjFyhFcUDiDhjHG-X6duY3EtQCKRlyJnFL4Wa47fV-8ZVlPcV_ZPzmHDDpF4DaU9hW2tnz4jtW0jSbB0YvcjSoTEDTCA9y09y9yfNovNK4KAgrSG5Sn-W7pbAD_evAJZMFZTmXl57rrno6KQdNeU540CrG58eB9MqkSBV6fh1CmJLRZU1w0b2YiAN4Y0fXZm6Te73b_olgo_v2C-QvU-DfIcjLA6uDCnRnTxljg
